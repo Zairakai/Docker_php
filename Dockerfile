@@ -137,6 +137,7 @@ COPY --chown=root:root config/dev/xdebug.ini /usr/local/etc/php/conf.d/xdebug.in
 # Install dev tools and Xdebug
 RUN apk add --no-cache \
     git \
+    make \
     vim \
     curl \
     wget \
