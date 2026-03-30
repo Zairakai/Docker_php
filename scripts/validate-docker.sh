@@ -84,7 +84,7 @@ check_dockerfile_raw "AS test" "Test target"
 # Check base target requirements
 echo ""
 echo "Base Target Requirements:"
-check_dockerfile_raw "FROM php:8.3-fpm-alpine AS base" "Uses correct base image"
+check_dockerfile_raw "FROM php:8.4-fpm-alpine AS base" "Uses correct base image"
 check_dockerfile "adduser -u 1000" "Creates www user with UID 1000"
 check_dockerfile "install -d.*var/lib/php/sessions" "Creates sessions directory"
 check_dockerfile "install -d.*var/log/php" "Creates PHP log directory"

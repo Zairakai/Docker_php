@@ -14,12 +14,12 @@ ARG BUILD_DATE=unknown
 # ================
 # STAGE 0: BASE
 # ================
-FROM php:8.3-fpm-alpine AS base
+FROM php:8.4-fpm-alpine AS base
 
 LABEL maintainer="Stanislas Poisson <stanislas.p@the-white-rabbits.com>" \
     org.opencontainers.image.source="https://gitlab.com/zairakai/dockers/php" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.description="PHP 8.3 FPM Alpine base image"
+    org.opencontainers.image.description="PHP 8.4 FPM Alpine base image"
 
 ARG REDIS_VERSION
 ARG IMAGE_VERSION
@@ -103,7 +103,7 @@ CMD ["php-fpm"]
 FROM base AS prod
 
 LABEL stage="prod" \
-    description="Production-ready PHP 8.3 FPM"
+    description="Production-ready PHP 8.4 FPM"
 
 ENV BUILD_STAGE=prod
 
@@ -119,7 +119,7 @@ USER www
 FROM base AS dev
 
 LABEL stage="dev" \
-    description="Development PHP 8.3 with Xdebug"
+    description="Development PHP 8.4 with Xdebug"
 
 ARG XDEBUG_VERSION
 
@@ -160,7 +160,7 @@ USER www
 FROM base AS test
 
 LABEL stage="test" \
-    description="Test PHP 8.3 with PCOV for coverage"
+    description="Test PHP 8.4 with PCOV for coverage"
 
 ARG PCOV_VERSION
 
