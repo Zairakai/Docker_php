@@ -1,4 +1,4 @@
-# Zairakai PHP 8.3 Docker Image
+# Zairakai PHP 8.4 Docker Image
 
 [![Main][pipeline-main-badge]][pipeline-main-link]
 [![Security][security-badge]][security]
@@ -12,15 +12,15 @@
 [![Dev Image Size][docker-dev-size-badge]][dockerhub]
 [![Test Image Size][docker-test-size-badge]][dockerhub]
 
-Lightweight, secure, and optimized PHP 8.3 FPM images designed for **Laravel** applications.
+Lightweight, secure, and optimized PHP 8.4 FPM images designed for **Laravel** applications.
 
-Production-ready PHP 8.3 FPM image with multi-stage builds for production, development, and testing.
+Production-ready PHP 8.4 FPM image with multi-stage builds for production, development, and testing.
 
 ## Features
 
 ### Production Stage (`prod`)
 
-- PHP 8.3 FPM on Alpine Linux
+- PHP 8.4 FPM on Alpine Linux
 - Essential extensions: Redis, PDO MySQL/PostgreSQL, GD, Zip, Intl, BCMath, OPcache
 - Composer 2
 - OPcache optimized for production with JIT compilation
@@ -306,7 +306,7 @@ make ci-full             # Complete validation
 [pipeline-main-link]: https://gitlab.com/zairakai/dockers/php/-/commits/main
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license]: ./LICENSE
-[php-badge]: https://img.shields.io/badge/php-8.3-blue.svg
+[php-badge]: https://img.shields.io/badge/php-8.4-blue.svg
 [php]: https://www.php.net/
 [release-badge]: https://img.shields.io/gitlab/v/release/zairakai%2Fdockers%2Fphp?logo=gitlab
 [release]: https://gitlab.com/zairakai/dockers/php/-/releases
