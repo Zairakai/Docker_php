@@ -61,6 +61,7 @@ RUN apk add --no-cache \
     bash \
     fcgi \
     freetype \
+    imagemagick \
     libjpeg-turbo \
     libpng \
     libzip \
@@ -69,6 +70,7 @@ RUN apk add --no-cache \
     postgresql-libs \
     && apk add --no-cache --virtual .build-deps \
     freetype-dev \
+    imagemagick-dev \
     libjpeg-turbo-dev \
     libpng-dev \
     libzip-dev \
@@ -89,6 +91,8 @@ RUN apk add --no-cache \
     opcache \
     pcntl \
     sockets \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
     && pecl install redis-${REDIS_VERSION} \
     && docker-php-ext-enable redis \
     && apk del .build-deps \
