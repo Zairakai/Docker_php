@@ -43,6 +43,12 @@ variables:
 # ================================
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
+  # Scheduled-only jobs (Trivy audit of published images, version check
+  # against upstream). Kept in a separate file since these run against a
+  # cron schedule, not the normal push/MR/tag pipeline below.
+  - local: .gitlab-ci-scheduled.yml
+    rules:
+      - if: $CI_PIPELINE_SOURCE == "schedule"
 
 secret_detection:
   stage: security
