@@ -3,7 +3,7 @@
 # ================
 # PECL extensions
 ARG REDIS_VERSION=6.3.0
-ARG XDEBUG_VERSION=3.5.1
+ARG XDEBUG_VERSION=3.5.3
 ARG PCOV_VERSION=1.0.12
 
 # Build metadata
