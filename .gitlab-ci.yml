@@ -18,6 +18,11 @@ stages:
   - scan
   - promote
   - release
+  # Scheduled-only stages, used by the jobs conditionally included from
+  # .gitlab-ci-scheduled.yml (CI_PIPELINE_SOURCE == schedule). GitLab does
+  # not merge stage lists across includes, so they must be declared here.
+  - security-audit
+  - version-check
 
 variables:
   # Project metadata
