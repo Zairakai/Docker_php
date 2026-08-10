@@ -38,6 +38,7 @@ Production-ready PHP 8.4 FPM image with multi-stage builds for production, devel
 - Database clients: MySQL, PostgreSQL, Redis
 - OPcache with validate_timestamps enabled
 - Extended error reporting
+- `phpdoc` - phpDocumentor, auto-generated API docs from source (docblocks + types)
 
 ### Test Stage (`test`)
 

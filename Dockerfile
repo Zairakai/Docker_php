@@ -6,6 +6,9 @@ ARG REDIS_VERSION=6.3.0
 ARG XDEBUG_VERSION=3.5.3
 ARG PCOV_VERSION=1.0.12
 
+# Dev tooling
+ARG PHPDOCUMENTOR_VERSION=3.10.0
+
 # Build metadata
 ARG IMAGE_VERSION=unknown
 ARG GIT_COMMIT=unknown
@@ -126,9 +129,11 @@ LABEL stage="dev" \
     description="Development PHP 8.4 with Xdebug"
 
 ARG XDEBUG_VERSION
+ARG PHPDOCUMENTOR_VERSION
 
 ENV BUILD_STAGE=dev \
     XDEBUG_VERSION=${XDEBUG_VERSION} \
+    PHPDOCUMENTOR_VERSION=${PHPDOCUMENTOR_VERSION} \
     COMPOSER_MEMORY_LIMIT=-1
 
 USER root
@@ -155,6 +160,16 @@ RUN apk add --no-cache \
     && docker-php-ext-enable xdebug \
     && apk del .xdebug-build-deps \
     && rm -rf /tmp/pear /var/cache/apk/*
+
+# Install phpDocumentor - auto-generated API docs from source (docblocks +
+# types), dev-only. Never baked into prod/test - see zairakai/laravel-twitch
+# for a consumer example (`make docs`).
+RUN curl -sL "https://github.com/phpDocumentor/phpDocumentor/releases/download/v${PHPDOCUMENTOR_VERSION}/phpDocumentor.phar" \
+    -o /usr/local/bin/phpDocumentor.phar \
+    && chmod +x /usr/local/bin/phpDocumentor.phar \
+    && printf '#!/bin/sh\nexec php /usr/local/bin/phpDocumentor.phar "$@"\n' > /usr/local/bin/phpdoc \
+    && chmod +x /usr/local/bin/phpdoc \
+    && phpdoc --version
 
 USER www
 
