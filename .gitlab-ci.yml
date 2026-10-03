@@ -5,7 +5,7 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_BRANCH == "main"
     - when: never
@@ -61,6 +61,35 @@ secret_detection:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_BRANCH == "main"
+
+# A tag whose format is not the one of VERSION_TAG_REGEX (group variable) fails here,
+# and the jobs that build and publish do not run for it.
+tag-format:
+  stage: security
+  image: ${ALPINE_IMAGE}
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      regex="${VERSION_TAG_REGEX:-}"
+      regex="${regex#/}"
+      regex="${regex%/}"
+      if [ -z "$regex" ]; then
+        echo "ERROR: VERSION_TAG_REGEX is not set. It is a variable of the zairakai group."
+        exit 1
+      fi
+      if ! printf '%s\n' "$CI_COMMIT_TAG" | grep -Eq "$regex"; then
+        echo "ERROR: the tag \"$CI_COMMIT_TAG\" does not match $VERSION_TAG_REGEX."
+        exit 1
+      fi
+      # The images only take a final version: a pre-release would move latest, MAJOR and MINOR
+      case "$CI_COMMIT_TAG" in
+        *-*)
+          echo "ERROR: the tag \"$CI_COMMIT_TAG\" is a pre-release. The images only take X.Y.Z."
+          exit 1
+          ;;
+      esac
+      echo "Tag $CI_COMMIT_TAG: format OK"
 
 # ================================
 # VALIDATION STAGE
@@ -143,7 +172,7 @@ test:bats:
       echo ""
   script:
     - |
-      VERSION="${CI_COMMIT_TAG#v}"
+      VERSION="${CI_COMMIT_TAG}"
       MAJOR="${VERSION%%.*}"
       MINOR="${VERSION%.*}"
 
@@ -191,7 +220,7 @@ build:prod:
     TARGET: prod
     SUFFIX: ""
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
 
 build:dev:
   extends: .build-template
@@ -199,7 +228,7 @@ build:dev:
     TARGET: dev
     SUFFIX: "-dev"
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
 
 build:test:
   extends: .build-template
@@ -207,7 +236,7 @@ build:test:
     TARGET: test
     SUFFIX: "-test"
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
 
 # ================================
 # SCAN STAGE
@@ -260,7 +289,7 @@ build:test:
     expire_in: 1 month
     when: always
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
 
 scan:prod:
   extends: .scan-template
@@ -305,7 +334,7 @@ scan:test:
     - crane auth login -u "${DOCKERHUB_USERNAME}" -p "${DOCKERHUB_TOKEN}" index.docker.io
   script:
     - |
-      VERSION="${CI_COMMIT_TAG#v}"
+      VERSION="${CI_COMMIT_TAG}"
       MAJOR="${VERSION%%.*}"
       MINOR="${VERSION%.*}"
 
@@ -325,7 +354,7 @@ scan:test:
       echo "✅ Promotion complete"
       echo "   Images available at: https://hub.docker.com/r/${DOCKERHUB_IMAGE}/tags"
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
 
 promote:prod:
   extends: .promote-template
@@ -375,7 +404,7 @@ release:create-gitlab-release:
       fi
       echo ""
       echo "🚀 Creating GitLab Release"
-      VERSION="${CI_COMMIT_TAG#v}"
+      VERSION="${CI_COMMIT_TAG}"
       echo "Tag     : ${CI_COMMIT_TAG}"
       echo "Version : ${VERSION}"
       echo ""
@@ -393,4 +422,4 @@ release:create-gitlab-release:
       - release_notes.md
     expire_in: 1 year
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
