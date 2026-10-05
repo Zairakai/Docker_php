@@ -57,7 +57,7 @@ COPY --chown=root:root scripts/healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/*.sh
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD /usr/local/bin/healthcheck.sh
+    CMD ["/usr/local/bin/healthcheck.sh"]
 
 # Install system dependencies and PHP extensions
 RUN apk add --no-cache \
