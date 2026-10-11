@@ -151,6 +151,7 @@ RUN apk add --no-cache \
     curl \
     wget \
     unzip \
+    gnupg \
     mariadb-client \
     postgresql-client \
     && apk add --no-cache --virtual .xdebug-build-deps \
