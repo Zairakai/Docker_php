@@ -90,6 +90,23 @@ validate:dockerfile:
   script:
     - hadolint Dockerfile
 
+# The tool image variables of the group must name the base image of the Dockerfile.
+validate:versions:
+  stage: validate
+  image: ${ALPINE_IMAGE}
+  script:
+    - |
+      version="$(sed -n 's/^ARG PHP_VERSION=//p' Dockerfile | head -n1)"
+      if [ -z "$version" ]; then
+        echo "ERROR: no ARG PHP_VERSION in the Dockerfile."
+        exit 1
+      fi
+      if [ "${PHP_ALPINE_IMAGE}" != "php:${version}-fpm-alpine" ]; then
+        echo "ERROR: PHP_ALPINE_IMAGE is \"${PHP_ALPINE_IMAGE}\" (group zairakai/dockers), the Dockerfile asks for \"php:${version}-fpm-alpine\"."
+        exit 1
+      fi
+      echo "PHP_ALPINE_IMAGE matches the Dockerfile: ${version}"
+
 validate:markdownlint:
   stage: validate
   image: ${NODE_IMAGE}
@@ -124,6 +141,7 @@ test:bats:
   needs:
     - validate:dockerfile
     - validate:markdownlint
+    - validate:versions
     - validate:shellcheck
   before_script:
     - apk add --no-cache bash git coreutils findutils make jq

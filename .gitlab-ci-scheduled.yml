@@ -165,7 +165,7 @@ version:check:
 
       # PHP base image minor line (e.g. 8.4) — checks whether the next
       # minor line already has a published fpm-alpine image.
-      CURRENT_PHP=$(grep -oE 'FROM php:[0-9]+\.[0-9]+' Dockerfile | head -n1 | grep -oE '[0-9]+\.[0-9]+')
+      CURRENT_PHP=$(grep -oE 'ARG PHP_VERSION=[0-9]+\.[0-9]+' Dockerfile | head -n1 | grep -oE '[0-9]+\.[0-9]+')
       NEXT_PHP=$(echo "${CURRENT_PHP}" | awk -F. '{print $1"."$2+1}')
       NEXT_COUNT=$(curl -sf --max-time 10 "https://hub.docker.com/v2/repositories/library/php/tags?page_size=25&name=${NEXT_PHP}-fpm-alpine" | jq -r '.count')
       if [ "${NEXT_COUNT}" -gt 0 ]; then
