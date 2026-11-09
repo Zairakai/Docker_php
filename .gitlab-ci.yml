@@ -72,14 +72,26 @@ tag-format:
         echo "ERROR: the tag \"$CI_COMMIT_TAG\" does not match $VERSION_TAG_REGEX."
         exit 1
       fi
-      # The images only take a final version: a pre-release would move latest, MAJOR and MINOR
-      case "$CI_COMMIT_TAG" in
-        *-*)
-          echo "ERROR: the tag \"$CI_COMMIT_TAG\" is a pre-release. The images only take X.Y.Z."
-          exit 1
-          ;;
-      esac
       echo "Tag $CI_COMMIT_TAG: format OK"
+
+# The tag is the version of the base image of the Dockerfile (24.22.2), or that version with a
+# revision (24.22.2-1); a pre-release is refused. The check is the script of the tooling submodule.
+tag-version:
+  stage: security
+  image: ${ALPINE_IMAGE}
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    VERSION_ENV: "PHP_VERSION"
+  rules:
+    - if: $CI_COMMIT_TAG
+  before_script:
+    - apk add --no-cache bash curl jq
+    - |
+      curl -fL "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" -o /tmp/go-containerregistry.tar.gz
+      tar -xzf /tmp/go-containerregistry.tar.gz -C /tmp
+      mv /tmp/crane /usr/local/bin/crane
+  script:
+    - bash tools/zairakai/.gitlab/scripts/check-tag-version.sh
 
 # ================================
 # VALIDATION STAGE
@@ -166,6 +178,8 @@ test:bats:
     entrypoint: [""]
   needs:
     - test:bats
+    - tag-format
+    - tag-version
   before_script:
     - |
       # Créer l'auth GitLab Registry
@@ -228,7 +242,7 @@ build:prod:
     TARGET: prod
     SUFFIX: ""
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/
 
 build:dev:
   extends: .build-template
@@ -236,7 +250,7 @@ build:dev:
     TARGET: dev
     SUFFIX: "-dev"
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/
 
 build:test:
   extends: .build-template
@@ -244,7 +258,7 @@ build:test:
     TARGET: test
     SUFFIX: "-test"
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/
 
 # ================================
 # SCAN STAGE
@@ -305,7 +319,7 @@ build:test:
     expire_in: 1 month
     when: always
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/
 
 scan:prod:
   extends: .scan-template
@@ -370,7 +384,7 @@ scan:test:
       echo "✅ Promotion complete"
       echo "   Images available at: https://hub.docker.com/r/${DOCKERHUB_IMAGE}/tags"
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/
 
 promote:prod:
   extends: .promote-template
@@ -438,4 +452,4 @@ release:create-gitlab-release:
       - release_notes.md
     expire_in: 1 year
   rules:
-    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9.]+$/
+    - if: $CI_COMMIT_TAG =~ $VERSION_TAG_REGEX && $CI_COMMIT_TAG =~ /^[0-9]+(\.[0-9]+){2}(-[0-9]+)?$/

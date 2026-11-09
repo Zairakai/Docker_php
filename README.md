@@ -64,10 +64,12 @@ make quick-test
 
 | Version | Production | Development | Test |
 | --- | --- | --- | --- |
-| **Patch** | `zairakai/php:1.2.3` | `zairakai/php:1.2.3-dev` | `zairakai/php:1.2.3-test` |
-| **Minor** | `zairakai/php:1.2` | `zairakai/php:1.2-dev` | `zairakai/php:1.2-test` |
-| **Major** | `zairakai/php:1` | `zairakai/php:1-dev` | `zairakai/php:1-test` |
+| **Patch** | `zairakai/php:8.4.27` | `zairakai/php:8.4.27-dev` | `zairakai/php:8.4.27-test` |
+| **Minor** | `zairakai/php:8.4` | `zairakai/php:8.4-dev` | `zairakai/php:8.4-test` |
+| **Major** | `zairakai/php:8` | `zairakai/php:8-dev` | `zairakai/php:8-test` |
 | **Latest** | `zairakai/php:latest` | `zairakai/php:latest-dev` | `zairakai/php:latest-test` |
+
+The tag is the version of PHP the image contains (`8.4.27`). A new build of the same PHP version gets a revision: `8.4.27-1`, `8.4.27-2`... (its Docker Hub tags `8.4`, `8` and `latest` move with it).
 
 ## Usage
 
