@@ -36,7 +36,7 @@ export IS_GITHUB_ACTIONS="${GITHUB_ACTIONS:-false}"
 # ================================
 export HAS_GIT=false
 if [[ -d "${PROJECT_ROOT}/.git" ]]; then
-    export HAS_GIT=true
+  export HAS_GIT=true
 fi
 
 # ================================
@@ -45,45 +45,45 @@ fi
 
 # Print colored message
 log_info() {
-    echo -e "${CYAN}ℹ ${NC}$*"
+  echo -e "${CYAN}ℹ ${NC}$*"
 }
 
 log_success() {
-    echo -e "${GREEN}✅ ${NC}$*"
+  echo -e "${GREEN}✅ ${NC}$*"
 }
 
 log_warning() {
-    echo -e "${YELLOW}⚠️  ${NC}$*"
+  echo -e "${YELLOW}⚠️  ${NC}$*"
 }
 
 log_error() {
-    echo -e "${RED}❌ ${NC}$*"
+  echo -e "${RED}❌ ${NC}$*"
 }
 
 log_step() {
-    echo -e "${BLUE}→${NC} $*"
+  echo -e "${BLUE}→${NC} $*"
 }
 
 log_header() {
-    echo ""
-    echo -e "${MAGENTA}════════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}  $*${NC}"
-    echo -e "${MAGENTA}════════════════════════════════════════${NC}"
-    echo ""
+  echo ""
+  echo -e "${MAGENTA}════════════════════════════════════════${NC}"
+  echo -e "${MAGENTA}  $*${NC}"
+  echo -e "${MAGENTA}════════════════════════════════════════${NC}"
+  echo ""
 }
 
 # Check if command exists
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
 # Ensure directory exists
 ensure_dir() {
-    local dir="$1"
-    if [[ ! -d "$dir" ]]; then
-        mkdir -p "$dir"
-        log_step "Created directory: $dir"
-    fi
+  local dir="$1"
+  if [[ ! -d "$dir" ]]; then
+    mkdir -p "$dir"
+    log_step "Created directory: $dir"
+  fi
 }
 
 # ================================
@@ -100,50 +100,50 @@ ensure_dir() {
 ERROR_COUNT=0
 
 init_error_counter() {
-    ERROR_COUNT=0
+  ERROR_COUNT=0
 }
 
 increment_error_counter() {
-    ERROR_COUNT=$((ERROR_COUNT + 1))
+  ERROR_COUNT=$((ERROR_COUNT + 1))
 }
 
 get_error_count() {
-    echo "$ERROR_COUNT"
+  echo "$ERROR_COUNT"
 }
 
 exit_with_error_count() {
-    local check_name="${1:-Checks}"
+  local check_name="${1:-Checks}"
 
-    if [[ $ERROR_COUNT -eq 0 ]]; then
-        log_header "✅ All ${check_name} Passed"
-        return 0
-    else
-        log_header "❌ ${ERROR_COUNT} ${check_name} Failed"
-        return 1
-    fi
+  if [[ $ERROR_COUNT -eq 0 ]]; then
+    log_header "✅ All ${check_name} Passed"
+    return 0
+  else
+    log_header "❌ ${ERROR_COUNT} ${check_name} Failed"
+    return 1
+  fi
 }
 
 # Run a check with error tracking
 # Usage: run_check "Check Name" "command to run"
 run_check() {
-    local check_name="$1"
-    local check_command="$2"
+  local check_name="$1"
+  local check_command="$2"
 
-    log_info "Running: ${check_name}"
+  log_info "Running: ${check_name}"
 
-    if eval "$check_command"; then
-        log_success "${check_name} passed"
-        return 0
-    else
-        log_error "${check_name} failed"
-        increment_error_counter
-        return 1
-    fi
+  if eval "$check_command"; then
+    log_success "${check_name} passed"
+    return 0
+  else
+    log_error "${check_name} failed"
+    increment_error_counter
+    return 1
+  fi
 }
 
 # Cleanup temporary files
 cleanup_temp_files() {
-    true;
+  true;
 }
 
 # Setup signal handlers for cleanup

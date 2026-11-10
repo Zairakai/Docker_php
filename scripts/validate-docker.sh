@@ -17,47 +17,47 @@ NORMALIZED_DOCKERFILE=$(sed ':a;N;$!ba;s/\\\n/ /g' "$PROJECT_ROOT/Dockerfile")
 
 # Function to check Dockerfile element
 check_dockerfile() {
-    local pattern="$1"
-    local description="$2"
+  local pattern="$1"
+  local description="$2"
 
-    if echo "$NORMALIZED_DOCKERFILE" | grep -q "$pattern"; then
-        echo "  - ✅ $description"
-        return 0
-    fi
+  if echo "$NORMALIZED_DOCKERFILE" | grep -q "$pattern"; then
+    echo "  - ✅ $description"
+    return 0
+  fi
 
-    echo "  - ❌ Missing: $description"
-    ((ERROR_COUNT++))
-    return 1
+  echo "  - ❌ Missing: $description"
+  ((ERROR_COUNT++))
+  return 1
 }
 
 # Function to check in raw Dockerfile (for labels and multi-line blocks)
 check_dockerfile_raw() {
-    local pattern="$1"
-    local description="$2"
+  local pattern="$1"
+  local description="$2"
 
-    if grep -q "$pattern" "$PROJECT_ROOT/Dockerfile"; then
-        echo "  - ✅ $description"
-        return 0
-    fi
+  if grep -q "$pattern" "$PROJECT_ROOT/Dockerfile"; then
+    echo "  - ✅ $description"
+    return 0
+  fi
 
-    echo "  - ❌ Missing: $description"
-    ((ERROR_COUNT++))
-    return 1
+  echo "  - ❌ Missing: $description"
+  ((ERROR_COUNT++))
+  return 1
 }
 
 # Function to check environment variable exists
 check_env_var() {
-    local var_name="$1"
-    local description="$2"
+  local var_name="$1"
+  local description="$2"
 
-    if echo "$NORMALIZED_DOCKERFILE" | grep -q "${var_name}="; then
-        echo "  - ✅ $description"
-        return 0
-    fi
+  if echo "$NORMALIZED_DOCKERFILE" | grep -q "${var_name}="; then
+    echo "  - ✅ $description"
+    return 0
+  fi
 
-    echo "  - ❌ Missing: $description"
-    ((ERROR_COUNT++))
-    return 1
+  echo "  - ❌ Missing: $description"
+  ((ERROR_COUNT++))
+  return 1
 }
 
 # Validate Dockerfile exists
@@ -66,9 +66,9 @@ echo "📁 Dockerfile Analysis:"
 DOCKERFILE="$PROJECT_ROOT/Dockerfile"
 
 if [[ ! -f "$DOCKERFILE" ]]; then
-    echo "  - ❌ Dockerfile not found"
-    ((ERROR_COUNT++))
-    exit 1
+  echo "  - ❌ Dockerfile not found"
+  ((ERROR_COUNT++))
+  exit 1
 fi
 
 echo "  - ✅ Dockerfile exists"
@@ -132,18 +132,18 @@ check_dockerfile_raw "config/dev/xdebug.ini" "Copies Xdebug config"
 
 # Check for development tools (using normalized)
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "apk add --no-cache.*git"; then
-    echo "  - ✅ Development tools installed"
+  echo "  - ✅ Development tools installed"
 else
-    echo "  - ❌ Development tools not found"
-    ((ERROR_COUNT++))
+  echo "  - ❌ Development tools not found"
+  ((ERROR_COUNT++))
 fi
 
 # Check Xdebug installation
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "pecl install xdebug"; then
-    echo "  - ✅ Xdebug installed"
+  echo "  - ✅ Xdebug installed"
 else
-    echo "  - ❌ Xdebug not installed"
-    ((ERROR_COUNT++))
+  echo "  - ❌ Xdebug not installed"
+  ((ERROR_COUNT++))
 fi
 
 # Check test target
@@ -154,10 +154,10 @@ check_dockerfile_raw "config/test/pcov.ini" "Copies PCOV config"
 
 # Check PCOV installation
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "pecl install pcov"; then
-    echo "  - ✅ PCOV installed"
+  echo "  - ✅ PCOV installed"
 else
-    echo "  - ❌ PCOV not installed"
-    ((ERROR_COUNT++))
+  echo "  - ❌ PCOV not installed"
+  ((ERROR_COUNT++))
 fi
 
 # Check labels
@@ -190,93 +190,93 @@ check_env_var "REDIS_VERSION" "Redis version environment variable"
 echo ""
 echo "Configuration File Validation:"
 config_files=(
-    "config/prod/php.ini"
-    "config/prod/fpm.conf"
-    "config/prod/opcache.ini"
-    "config/dev/php.ini"
-    "config/dev/xdebug.ini"
-    "config/test/php.ini"
-    "config/test/pcov.ini"
+  "config/prod/php.ini"
+  "config/prod/fpm.conf"
+  "config/prod/opcache.ini"
+  "config/dev/php.ini"
+  "config/dev/xdebug.ini"
+  "config/test/php.ini"
+  "config/test/pcov.ini"
 )
 
 for config_file in "${config_files[@]}"; do
-    if [[ -f "$PROJECT_ROOT/$config_file" ]]; then
-        echo "  - ✅ $config_file exists"
-    else
-        echo "  - ❌ $config_file missing"
-        ((ERROR_COUNT++))
-    fi
+  if [[ -f "$PROJECT_ROOT/$config_file" ]]; then
+    echo "  - ✅ $config_file exists"
+  else
+    echo "  - ❌ $config_file missing"
+    ((ERROR_COUNT++))
+  fi
 done
 
 # Validate scripts referenced in Dockerfile exist
 echo ""
 echo "Script File Validation:"
 script_files=(
-    "scripts/entrypoint.sh"
-    "scripts/healthcheck.sh"
+  "scripts/entrypoint.sh"
+  "scripts/healthcheck.sh"
 )
 
 for script_file in "${script_files[@]}"; do
-    if [[ -f "$PROJECT_ROOT/$script_file" ]]; then
-        if [[ -x "$PROJECT_ROOT/$script_file" ]]; then
-            echo "  - ✅ $script_file exists and executable"
-        else
-            echo "  - ⚠️  $script_file exists but not executable"
-        fi
+  if [[ -f "$PROJECT_ROOT/$script_file" ]]; then
+    if [[ -x "$PROJECT_ROOT/$script_file" ]]; then
+      echo "  - ✅ $script_file exists and executable"
     else
-        echo "  - ❌ $script_file missing"
-        ((ERROR_COUNT++))
+      echo "  - ⚠️  $script_file exists but not executable"
     fi
+  else
+    echo "  - ❌ $script_file missing"
+    ((ERROR_COUNT++))
+  fi
 done
 
 # Check for proper entrypoint and command
 echo ""
 echo "Entrypoint and Command:"
 if grep -q "ENTRYPOINT.*entrypoint.sh" "$PROJECT_ROOT/Dockerfile"; then
-    echo "  - ✅ Entrypoint set to entrypoint.sh"
+  echo "  - ✅ Entrypoint set to entrypoint.sh"
 else
-    echo "  - ❌ Entrypoint not properly set"
-    ((ERROR_COUNT++))
+  echo "  - ❌ Entrypoint not properly set"
+  ((ERROR_COUNT++))
 fi
 
 if grep -q "CMD.*php-fpm" "$PROJECT_ROOT/Dockerfile"; then
-    echo "  - ✅ Default command set to php-fpm"
+  echo "  - ✅ Default command set to php-fpm"
 else
-    echo "  - ❌ Default command not set"
-    ((ERROR_COUNT++))
+  echo "  - ❌ Default command not set"
+  ((ERROR_COUNT++))
 fi
 
 # Additional security checks
 echo ""
 echo "Security Best Practices:"
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "apk del.*build-deps"; then
-    echo "  - ✅ Build dependencies cleaned up"
+  echo "  - ✅ Build dependencies cleaned up"
 else
-    echo "  - ⚠️  Build dependencies not cleaned"
+  echo "  - ⚠️  Build dependencies not cleaned"
 fi
 
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "rm -rf.*pear.*cache"; then
-    echo "  - ✅ Temporary files cleaned"
+  echo "  - ✅ Temporary files cleaned"
 else
-    echo "  - ⚠️  Temporary files may remain"
+  echo "  - ⚠️  Temporary files may remain"
 fi
 
 # Check directory permissions
 echo ""
 echo "Directory Permissions:"
 if echo "$NORMALIZED_DOCKERFILE" | grep -q "install -d -m 0755 -o www -g www"; then
-    echo "  - ✅ Directories created with proper permissions"
+  echo "  - ✅ Directories created with proper permissions"
 else
-    echo "  - ⚠️  Directory permissions may need review"
+  echo "  - ⚠️  Directory permissions may need review"
 fi
 
 echo ""
 if [[ $ERROR_COUNT -eq 0 ]]; then
-    echo "✅ Docker structure validation passed"
-    echo "━━━━━━━━━━━━━━━━"
-    exit 0
+  echo "✅ Docker structure validation passed"
+  echo "━━━━━━━━━━━━━━━━"
+  exit 0
 else
-    echo "❌ Docker structure validation failed with $ERROR_COUNT error(s)"
-    echo "━━━━━━━━━━━━━━━━"
-    exit 1
+  echo "❌ Docker structure validation failed with $ERROR_COUNT error(s)"
+  echo "━━━━━━━━━━━━━━━━"
+  exit 1
 fi
