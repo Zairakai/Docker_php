@@ -1,6 +1,9 @@
 # ================
 # BUILD ARGUMENTS - VERSIONS
 # ================
+# Minor line of the base image: the patch follows upstream, the tag of the release says which one
+ARG PHP_VERSION=8.4
+
 # PECL extensions
 ARG REDIS_VERSION=6.3.0
 ARG XDEBUG_VERSION=3.5.3
@@ -17,7 +20,7 @@ ARG BUILD_DATE=unknown
 # ================
 # STAGE 0: BASE
 # ================
-FROM php:8.4-fpm-alpine AS base
+FROM php:${PHP_VERSION}-fpm-alpine AS base
 
 LABEL maintainer="Stanislas Poisson <stanislas.p@the-white-rabbits.com>" \
     org.opencontainers.image.source="https://gitlab.com/zairakai/dockers/php" \
@@ -146,6 +149,7 @@ COPY --chown=root:root config/dev/xdebug.ini /usr/local/etc/php/conf.d/xdebug.in
 # Install dev tools and Xdebug
 RUN apk add --no-cache \
     git \
+    jq \
     make \
     vim \
     curl \
@@ -199,7 +203,7 @@ COPY --chown=root:root config/test/php.ini /usr/local/etc/php/conf.d/custom-test
 COPY --chown=root:root config/test/pcov.ini /usr/local/etc/php/conf.d/pcov.ini
 
 # Install PCOV
-RUN apk add --no-cache git \
+RUN apk add --no-cache git jq \
     && apk add --no-cache --virtual .pcov-build-deps \
     $PHPIZE_DEPS \
     linux-headers \

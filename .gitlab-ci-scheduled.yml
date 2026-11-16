@@ -11,14 +11,20 @@ stages:
 
 variables:
   DOCKERHUB_IMAGE: "zairakai/php"
-  ALPINE_IMAGE: "alpine:latest"
 
 .scan-latest-template:
   stage: security-audit
-  image: ${ALPINE_IMAGE}
+  image:
+    name: aquasec/trivy:${TRIVY_VERSION}
+    entrypoint: [""]
+  variables:
+    TRIVY_CACHE_DIR: ${CI_PROJECT_DIR}/.trivycache
+  cache:
+    key: trivy-db
+    paths:
+      - .trivycache/
   before_script:
-    - apk add --no-cache curl bash jq
-    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - apk add --no-cache bash jq
   script:
     - |
       echo "━━━━━━━━━━━━━━━━"
@@ -159,7 +165,7 @@ version:check:
 
       # PHP base image minor line (e.g. 8.4) — checks whether the next
       # minor line already has a published fpm-alpine image.
-      CURRENT_PHP=$(grep -oE 'FROM php:[0-9]+\.[0-9]+' Dockerfile | head -n1 | grep -oE '[0-9]+\.[0-9]+')
+      CURRENT_PHP=$(grep -oE 'ARG PHP_VERSION=[0-9]+\.[0-9]+' Dockerfile | head -n1 | grep -oE '[0-9]+\.[0-9]+')
       NEXT_PHP=$(echo "${CURRENT_PHP}" | awk -F. '{print $1"."$2+1}')
       NEXT_COUNT=$(curl -sf --max-time 10 "https://hub.docker.com/v2/repositories/library/php/tags?page_size=25&name=${NEXT_PHP}-fpm-alpine" | jq -r '.count')
       if [ "${NEXT_COUNT}" -gt 0 ]; then
@@ -195,8 +201,8 @@ version:check:
 # ================================
 # SCHEDULED FRESHNESS CHECK
 # ================================
-# Follows the upstream base image (scripts/freshness-check.sh): alert and issue
-# for every new upstream version, and with AUTO_REBUILD=true a signed patch tag
+# Follows the upstream base image (tools/zairakai/.gitlab/scripts/freshness-check.sh, from the tooling submodule): alert and issue
+# for every new upstream version, and with AUTO_REBUILD=true a signed tag (the upstream version)
 # once the cooldown is over. Uses the group variables GITLAB_TOKEN,
 # GPG_PRIVATE_KEY_B64, RELEASE_SIGNER_NAME and RELEASE_SIGNER_EMAIL, and
 # NTFY_URL for the alert.
@@ -207,6 +213,7 @@ freshness:check:
   needs:
     - audit:latest-prod
   variables:
+    GIT_SUBMODULE_STRATEGY: normal
     VERSION_ENV: "PHP_VERSION"
     PUBLISHED_IMAGE: "${DOCKERHUB_IMAGE}:latest"
     AUDIT_JSON: "trivy-audit-prod.json"
@@ -220,6 +227,6 @@ freshness:check:
       mv /tmp/crane /usr/local/bin/crane
       chmod +x /usr/local/bin/crane
   script:
-    - bash scripts/freshness-check.sh
+    - bash tools/zairakai/.gitlab/scripts/freshness-check.sh
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
