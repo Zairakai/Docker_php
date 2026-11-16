@@ -48,6 +48,17 @@ load "../helpers/common"
   [[ "$status" -eq 0 ]]
 }
 
+@test "Development and test targets install jq, the production target does not" {
+  # The stage of each target, from its FROM to the next one
+  dev="$(awk '/^FROM base AS dev/{f=1;next} /^FROM /{f=0} f' "${PROJECT_ROOT}/Dockerfile")"
+  test_stage="$(awk '/^FROM base AS test/{f=1;next} /^FROM /{f=0} f' "${PROJECT_ROOT}/Dockerfile")"
+  prod="$(awk '/^FROM base AS prod/{f=1;next} /^FROM /{f=0} f' "${PROJECT_ROOT}/Dockerfile")"
+
+  [[ "$dev" =~ (^|[[:space:]])jq([[:space:]]|$) ]]
+  [[ "$test_stage" =~ (^|[[:space:]])jq([[:space:]]|$) ]]
+  [[ ! "$prod" =~ (^|[[:space:]])jq([[:space:]]|$) ]]
+}
+
 @test "Production target runs as non-root user" {
   run grep -B3 "# STAGE 2" "${PROJECT_ROOT}/Dockerfile"
   [[ "$output" =~ "USER www" ]]
