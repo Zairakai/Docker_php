@@ -149,6 +149,7 @@ COPY --chown=root:root config/dev/xdebug.ini /usr/local/etc/php/conf.d/xdebug.in
 # Install dev tools and Xdebug
 RUN apk add --no-cache \
     git \
+    jq \
     make \
     vim \
     curl \
@@ -202,7 +203,7 @@ COPY --chown=root:root config/test/php.ini /usr/local/etc/php/conf.d/custom-test
 COPY --chown=root:root config/test/pcov.ini /usr/local/etc/php/conf.d/pcov.ini
 
 # Install PCOV
-RUN apk add --no-cache git \
+RUN apk add --no-cache git jq \
     && apk add --no-cache --virtual .pcov-build-deps \
     $PHPIZE_DEPS \
     linux-headers \
